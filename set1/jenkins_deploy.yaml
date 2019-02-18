@@ -1,0 +1,127 @@
+# CJE kubernetes
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cjoc
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: master-management
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get","list","watch"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+# - apiGroups: [""]
+#   resources: ["namespaces"]
+#   verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get","list","watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: cjoc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: master-management
+  # namespace: myproject
+subjects:
+- kind: ServiceAccount
+  name: cjoc
+---
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: pods-all
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get","list","watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: jenkins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pods-all
+  # namespace: myproject
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+        - name: jenkins
+#         image: harbor.corp.local/library/myjenkins:v1
+          image: jenkins/jenkins:lts
+          env:
+            - name: JAVA_OPTS
+              value: -Djenkins.install.runSetupWizard=false
+          ports:
+            - name: http-port
+              containerPort: 8080
+            - name: jnlp-port
+              containerPort: 50000
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /home
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins_claim

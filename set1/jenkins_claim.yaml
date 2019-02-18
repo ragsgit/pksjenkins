@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jenkins_claim
+  namespace: jenkins
+  annotations:
+    volume.beta.kubernetes.io/storage-class: vspherescretain
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
