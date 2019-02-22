@@ -120,8 +120,8 @@ spec:
               containerPort: 50000
           volumeMounts:
             - name: jenkins-home
-              mountPath: /home
+              mountPath: /var/jenkins-home
       volumes:
         - name: jenkins-home
           persistentVolumeClaim:
-            claimName: jenkins_claim
+            claimName: jenkins-claim
