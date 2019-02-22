@@ -125,3 +125,5 @@ spec:
         - name: jenkins-home
           persistentVolumeClaim:
             claimName: jenkins-claim
+      securityContext:
+        fsGroup: 1000
