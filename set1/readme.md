@@ -1,4 +1,3 @@
-In this version, Jenkins pod comes up, but doesn't get the projects from the previous run.  
+Simple Jenkins install on PKS with vSphere storage for JENKINS_HOME
 Steps: Create SC, PVC, deploy pod, and define service.  
-Lauch Jenkins browser, create projects,  
-Check projects is JENKINS_HOME/.jobs folder   
+Lauch Jenkins browser, login should be automatic
